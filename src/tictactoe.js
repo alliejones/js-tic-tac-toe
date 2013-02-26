@@ -21,7 +21,9 @@ T3.utils.isACell = function (node) {
 
 
 T3.Board = function(containerID) {
-  this.size = 5;
+  this.size = 4;
+  this.moveCount = 0;
+  this.maxMoves = this.size * this.size;
   this.currentPlayer = this.X_CELL;
 
   this.buildBoard(containerID);
@@ -58,11 +60,7 @@ T3.Board.prototype.forEachCell = function (func) {
 };
 
 T3.Board.prototype.isGameOver = function() {
-  var isOver = true;
-  this.forEachCell(function(cell) {
-    if (cell.isEmpty()) { isOver = false; }
-  });
-  return isOver;
+  return this.maxMoves <= this.moveCount;
 };
 
 T3.Board.prototype.buildCells = function() {
@@ -98,6 +96,7 @@ T3.Board.prototype.move = function (row, col) {
 
   if (cell !== undefined && !this.isGameOver() && this.isLegalMove(row, col) && cell.isEmpty()) {
     cell.value = this.currentPlayer;
+    this.moveCount++;
     this.currentPlayer = this.currentPlayer === this.X_CELL ? this.O_CELL : this.X_CELL;
 
     this.draw();
