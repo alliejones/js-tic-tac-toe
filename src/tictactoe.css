@@ -1,0 +1,17 @@
+#t3 { overflow: auto; }
+
+.t3-cell {
+  border: 1px solid #ccc;
+  color: #333;
+  float: left;
+  font-size: 80px;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+  width: 100px;
+}
+
+.t3-empty { cursor: hand; }
+.t3-pO, .t3-pX { cursor: not-allowed; background: #eee; }
+
+.t3-c0 { clear: left; }

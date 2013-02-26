@@ -1,0 +1,24 @@
+{
+  "name": "js-tictactoe",
+  "version": "0.0.1",
+  "description": "Nothing fancy.",
+  "main": "src/tictactoe.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "growl": "~1.7.0",
+    "should": "~1.2.2",
+    "jsdom": "~0.5.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": "",
+  "author": "Allie Jones",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "996c048d3da4cca4d54da64b1285da01b9418e24"
+}
