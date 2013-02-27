@@ -25,7 +25,7 @@ T3.utils.cellCoordinates = function (cells) {
 
 
 T3.Board = function(containerID, size, scope) {
-  // allows to pass a different scope for command-line testing
+  // allows to pass a different scope for testing
   this.scope = scope || document;
 
   this.size = size || 3;
@@ -76,7 +76,6 @@ T3.Board.prototype.isWinningMove = function(row, col) {
   var diagonalMatch = diagonalNeighbors.length === this.size && this.allMatch(cell.getDiagonalNeighbors());
 
   var antiDiagonalNeighbors = cell.getAntiDiagonalNeighbors();
-  console.log(antiDiagonalNeighbors);
   var antiDiagonalMatch = antiDiagonalNeighbors.length === this.size && this.allMatch(cell.getAntiDiagonalNeighbors());
 
   return horizontalMatch || verticalMatch || diagonalMatch || antiDiagonalMatch;

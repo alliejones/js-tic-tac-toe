@@ -6,12 +6,39 @@
   <link rel="stylesheet" href="src/tictactoe.css">
 </head>
 <body>
-  <div id="t3">
+  <div id="t3"></div>
+
+  <div id="startControls">
+    Board Size: <select id="size">
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+    </select>
+
+    <button id="start">Start Game</button>
   </div>
 
   <script src="src/tictactoe.js"></script>
   <script>
-    var board = new T3.Board('t3');
+    var startControls = document.getElementById('startControls');
+    var startButton = document.getElementById('start');
+    var sizeSelect = document.getElementById('size');
+    var board;
+
+    startButton.addEventListener('click', function(e) {
+      var size = sizeSelect.options[sizeSelect.selectedIndex].value;
+      board = new T3.Board('t3', size);
+
+      // make sure the board element is wide enough to fit all the cells
+      var cellWidth = window.getComputedStyle(document.getElementsByClassName('t3-cell')[0]).width.replace('px', '');
+      board.el.style.minWidth = (cellWidth + 2) * board.size + 'px';
+
+      startControls.parentNode.removeChild(startControls);
+    });
   </script>
 </body>
 </html>
