@@ -25,11 +25,13 @@ T3.utils.cellCoordinates = function (cells) {
 
 
 T3.Board = function(containerID, size, scope) {
-  this.size = 4;
+  // allows to pass a different scope for command-line testing
+  this.scope = scope || document;
+
+  this.size = size || 3;
   this.moveCount = 0;
   this.maxMoves = this.size * this.size;
   this.currentPlayer = this.X_CELL;
-  this.scope = scope || document;
 
   this.buildBoard(containerID);
   this.buildCells();
@@ -212,28 +214,23 @@ T3.Cell.prototype.getDiagonalNeighbors = function() {
   return neighbors;
 };
 
-T3.Cell.prototype.toString = function() { return this.row + ', ' + this.col; }
-
 T3.Cell.prototype.getAntiDiagonalNeighbors = function() {
   var neighbors = [];
-  var row, col, offset, rowOffset, colOffset;
+  var topRight = { row: this.row, col: this.col };
 
-  // offset from top right
-  colOffset = (this.board.size - 1) - this.col;
-  if (this.row > colOffset) {
-    offset = colOffset;
-  } else {
-    offset = this.row;
+  // find the coordinates of the top right cell on the anti-diagonal
+  while (topRight.row > 0 && topRight.col < this.board.size - 1) {
+    topRight.row--; topRight.col++;
   }
 
-  col = this.col + offset;
-  row = this.row;
+  var row = topRight.row;
+  var col = topRight.col;
 
-  // on anti-diagonal from top right, row increases and col decreases
-  while (col >= 0 && row < this.board.size) {
+  while (row < this.board.size && col >= 0) {
     neighbors.push(this.board.getCell(row, col));
-    col--; row++;
+    row++; col--;
   }
+
   return neighbors;
 };
 
