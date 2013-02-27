@@ -1,7 +1,6 @@
 var T3 = { utils: {} };
 
-
-
+// Anti diagonal win condition checking does not work
 
 T3.utils.emptyNode = function (node) {
   while (node.hasChildNodes()) { node.removeChild(node.lastChild); }
@@ -17,14 +16,20 @@ T3.utils.isACell = function (node) {
   return T3.utils.hasClass(node, 't3-cell');
 };
 
+T3.utils.cellCoordinates = function (cells) {
+  return cells.map(function(cell) {
+    return cell.row + ',' + cell.col;
+  });
+};
 
 
 
-T3.Board = function(containerID) {
+T3.Board = function(containerID, size, scope) {
   this.size = 4;
   this.moveCount = 0;
   this.maxMoves = this.size * this.size;
   this.currentPlayer = this.X_CELL;
+  this.scope = scope || document;
 
   this.buildBoard(containerID);
   this.buildCells();
@@ -37,9 +42,9 @@ T3.Board.prototype.X_CELL = 'X';
 T3.Board.prototype.O_CELL = 'O';
 
 T3.Board.prototype.buildBoard = function(containerID) {
-  var container = document.getElementById(containerID);
+  var container = this.scope.getElementById(containerID);
 
-  this.el = document.createElement('div');
+  this.el = this.scope.createElement('div');
   container.appendChild(this.el);
 
   container.addEventListener('click', function(e) {
@@ -59,6 +64,33 @@ T3.Board.prototype.forEachCell = function (func) {
   }
 };
 
+T3.Board.prototype.isWinningMove = function(row, col) {
+  var cell = this.getCell(row,col);
+
+  var horizontalMatch = this.allMatch(cell.getHorizontalNeighbors());
+  var verticalMatch = this.allMatch(cell.getVerticalNeighbors());
+
+  var diagonalNeighbors = cell.getDiagonalNeighbors();
+  var diagonalMatch = diagonalNeighbors.length === this.size && this.allMatch(cell.getDiagonalNeighbors());
+
+  var antiDiagonalNeighbors = cell.getAntiDiagonalNeighbors();
+  console.log(antiDiagonalNeighbors);
+  var antiDiagonalMatch = antiDiagonalNeighbors.length === this.size && this.allMatch(cell.getAntiDiagonalNeighbors());
+
+  return horizontalMatch || verticalMatch || diagonalMatch || antiDiagonalMatch;
+};
+
+T3.Board.prototype.allMatch = function(cells) {
+  var match = true;
+  for (var i = 0; i < cells.length; i++) {
+    if (cells[i].value !== this.currentPlayer) {
+      match = false;
+      break;
+    }
+  }
+  return match;
+};
+
 T3.Board.prototype.isGameOver = function() {
   return this.maxMoves <= this.moveCount;
 };
@@ -76,7 +108,7 @@ T3.Board.prototype.buildCells = function() {
 };
 
 T3.Board.prototype.isLegalMove = function (row, col) {
-  return row < this.state.length && col < this.state[0].length;
+  return row < this.size && col < this.size;
 };
 
 T3.Board.prototype.getCell = function (row, col) {
@@ -96,12 +128,17 @@ T3.Board.prototype.move = function (row, col) {
 
   if (cell !== undefined && !this.isGameOver() && this.isLegalMove(row, col) && cell.isEmpty()) {
     cell.value = this.currentPlayer;
-    this.moveCount++;
-    this.currentPlayer = this.currentPlayer === this.X_CELL ? this.O_CELL : this.X_CELL;
 
-    this.draw();
+    if (this.isWinningMove(row, col)) {
+      console.log('Game over! ' + this.currentPlayer + ' wins!');
+    }
+
+    this.moveCount++;
 
     if (this.isGameOver()) { this.endGame(); }
+
+    this.currentPlayer = this.currentPlayer === this.X_CELL ? this.O_CELL : this.X_CELL;
+    this.draw();
   }
 };
 
@@ -129,11 +166,76 @@ T3.Cell.prototype.getClasses = function() {
 };
 
 T3.Cell.prototype.getElement = function() {
-  var el = document.createElement('div');
+  var el = this.board.scope.createElement('div');
   el.setAttribute('class', this.getClasses())
   el.setAttribute('data-row', this.row);
   el.setAttribute('data-col', this.col);
-  el.appendChild(document.createTextNode(this.value));
+  el.appendChild(this.board.scope.createTextNode(this.value));
 
   return el;
 };
+
+T3.Cell.prototype.getHorizontalNeighbors = function() {
+  var neighbors = [];
+  for (var i = 0, size = this.board.size; i < size; i++) {
+    neighbors.push(this.board.getCell(this.row, i));
+  }
+  return neighbors;
+};
+
+T3.Cell.prototype.getVerticalNeighbors = function() {
+  var neighbors = [];
+  for (var i = 0, size = this.board.size; i < size; i++) {
+    neighbors.push(this.board.getCell(i, this.col));
+  }
+  return neighbors;
+};
+
+T3.Cell.prototype.getDiagonalNeighbors = function() {
+  var neighbors = [];
+  var row, col, offset;
+
+  // find the coordinate of the top left diagonal neighbor
+  if (this.row > this.col) {
+    offset = 0 - this.col;
+  } else {
+    offset = 0 - this.row;
+  }
+
+  col = this.col + offset;
+  row = this.row + offset;
+
+  while (col < this.board.size && row < this.board.size) {
+    neighbors.push(this.board.getCell(row, col));
+    col++; row++;
+  }
+  return neighbors;
+};
+
+T3.Cell.prototype.toString = function() { return this.row + ', ' + this.col; }
+
+T3.Cell.prototype.getAntiDiagonalNeighbors = function() {
+  var neighbors = [];
+  var row, col, offset, rowOffset, colOffset;
+
+  // offset from top right
+  colOffset = (this.board.size - 1) - this.col;
+  if (this.row > colOffset) {
+    offset = colOffset;
+  } else {
+    offset = this.row;
+  }
+
+  col = this.col + offset;
+  row = this.row;
+
+  // on anti-diagonal from top right, row increases and col decreases
+  while (col >= 0 && row < this.board.size) {
+    neighbors.push(this.board.getCell(row, col));
+    col--; row++;
+  }
+  return neighbors;
+};
+
+
+if (typeof module !== 'undefined') { module.exports = T3; }
