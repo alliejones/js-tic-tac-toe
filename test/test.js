@@ -1,5 +1,5 @@
 var should = require('should');
-var T3 = require('../src/tictactoe.js');
+var T3 = require('../dist/tictactoe.js');
 var jsdom = require('jsdom').jsdom;
 
 var coords = function(cells) {

@@ -1,28 +1,4 @@
-var T3 = { utils: {} };
-
-// Anti diagonal win condition checking does not work
-
-T3.utils.emptyNode = function (node) {
-  while (node.hasChildNodes()) { node.removeChild(node.lastChild); }
-};
-
-T3.utils.hasClass = function (node, testClass) {
-  // based on jQuery's implementation: http://stackoverflow.com/a/5085587
-  var className = ' ' + node.className + ' ';
-  return className.indexOf(' ' + testClass + ' ') > -1;
-};
-
-T3.utils.isACell = function (node) {
-  return T3.utils.hasClass(node, 't3-cell');
-};
-
-T3.utils.cellCoordinates = function (cells) {
-  return cells.map(function(cell) {
-    return cell.row + ',' + cell.col;
-  });
-};
-
-
+var T3 = T3 || {};
 
 T3.Board = function(containerID, size, scope) {
   // allows to pass a different scope for testing
@@ -43,6 +19,9 @@ T3.Board.prototype.EMPTY_CELL = ' ';
 T3.Board.prototype.X_CELL = 'X';
 T3.Board.prototype.O_CELL = 'O';
 
+
+/// SETUP ///
+
 T3.Board.prototype.buildBoard = function(containerID) {
   var container = this.scope.getElementById(containerID);
 
@@ -58,27 +37,31 @@ T3.Board.prototype.buildBoard = function(containerID) {
   }.bind(this));
 };
 
+T3.Board.prototype.buildCells = function() {
+  this.state = [];
+
+  for (var row = 0; row < this.size; row++) {
+    var rowCells = [];
+    for (var col = 0; col < this.size; col++) {
+      rowCells.push(new T3.Cell(row, col, this));
+    }
+    this.state.push(rowCells);
+  }
+};
+
+
+/// STATE CHECKING / UTILITIES ///
+
+T3.Board.prototype.getCell = function (row, col) {
+  return this.state[row][col];
+};
+
 T3.Board.prototype.forEachCell = function (func) {
   for (var row = 0; row < this.size; row++) {
     for (var col = 0; col < this.size; col++) {
       func.call(this, this.state[row][col]);
     }
   }
-};
-
-T3.Board.prototype.isWinningMove = function(row, col) {
-  var cell = this.getCell(row,col);
-
-  var horizontalMatch = this.allMatch(cell.getHorizontalNeighbors());
-  var verticalMatch = this.allMatch(cell.getVerticalNeighbors());
-
-  var diagonalNeighbors = cell.getDiagonalNeighbors();
-  var diagonalMatch = diagonalNeighbors.length === this.size && this.allMatch(cell.getDiagonalNeighbors());
-
-  var antiDiagonalNeighbors = cell.getAntiDiagonalNeighbors();
-  var antiDiagonalMatch = antiDiagonalNeighbors.length === this.size && this.allMatch(cell.getAntiDiagonalNeighbors());
-
-  return horizontalMatch || verticalMatch || diagonalMatch || antiDiagonalMatch;
 };
 
 T3.Board.prototype.allMatch = function(cells) {
@@ -92,29 +75,32 @@ T3.Board.prototype.allMatch = function(cells) {
   return match;
 };
 
-T3.Board.prototype.isGameOver = function() {
-  return this.maxMoves <= this.moveCount;
-};
-
-T3.Board.prototype.buildCells = function() {
-  this.state = [];
-
-  for (var row = 0; row < this.size; row++) {
-    var rowCells = [];
-    for (var col = 0; col < this.size; col++) {
-      rowCells.push(new T3.Cell(row, col, this));
-    }
-    this.state.push(rowCells);
-  }
-};
-
 T3.Board.prototype.isLegalMove = function (row, col) {
   return row < this.size && col < this.size;
 };
 
-T3.Board.prototype.getCell = function (row, col) {
-  return this.state[row][col];
+T3.Board.prototype.isWinningMove = function(row, col) {
+  var cell = this.getCell(row,col);
+
+  var horizontalMatch = this.allMatch(cell.getHorizontalNeighbors());
+
+  var verticalMatch = this.allMatch(cell.getVerticalNeighbors());
+
+  var diagonalNeighbors = cell.getDiagonalNeighbors();
+  var diagonalMatch = diagonalNeighbors.length === this.size && this.allMatch(cell.getDiagonalNeighbors());
+
+  var antiDiagonalNeighbors = cell.getAntiDiagonalNeighbors();
+  var antiDiagonalMatch = antiDiagonalNeighbors.length === this.size && this.allMatch(cell.getAntiDiagonalNeighbors());
+
+  return horizontalMatch || verticalMatch || diagonalMatch || antiDiagonalMatch;
 };
+
+T3.Board.prototype.isGameOver = function() {
+  return this.maxMoves <= this.moveCount;
+};
+
+
+/// GAMEPLAY ///
 
 T3.Board.prototype.draw = function() {
   T3.utils.emptyNode(this.el);
@@ -145,10 +131,7 @@ T3.Board.prototype.move = function (row, col) {
 
 T3.Board.prototype.endGame = function() {
   console.log('Game Over!');
-};
-
-
-
+};;var T3 = T3 || {};
 
 T3.Cell = function (row, col, board) {
   this.board = board;
@@ -232,6 +215,27 @@ T3.Cell.prototype.getAntiDiagonalNeighbors = function() {
 
   return neighbors;
 };
+;var T3 = T3 || {};
+T3.utils = {};
 
+T3.utils.emptyNode = function (node) {
+  while (node.hasChildNodes()) { node.removeChild(node.lastChild); }
+};
+
+T3.utils.hasClass = function (node, testClass) {
+  // based on jQuery's implementation: http://stackoverflow.com/a/5085587
+  var className = ' ' + node.className + ' ';
+  return className.indexOf(' ' + testClass + ' ') > -1;
+};
+
+T3.utils.isACell = function (node) {
+  return T3.utils.hasClass(node, 't3-cell');
+};
+
+T3.utils.cellCoordinates = function (cells) {
+  return cells.map(function(cell) {
+    return cell.row + ',' + cell.col;
+  });
+};
 
 if (typeof module !== 'undefined') { module.exports = T3; }
